@@ -1,0 +1,2 @@
+# Chat com RabbitMQ
+
