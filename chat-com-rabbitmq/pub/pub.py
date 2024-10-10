@@ -9,14 +9,22 @@ try:
 	# Conectando ao broker
 	channel = Channel(f"amqp://guest:guest@{ip}")
 
+	# Cria a mensagem
 	message = Message()
+
+	# Define quem enviou a mensagem
 	message.reply_to = input("Digite seu nome: ")
+
+	# Define o tópico
 	topico = input("Digite o tópico que deseja enviar: ")
 	print("\n")
 
 	while True:
+		# Define qual a mensagem e o destinatário
 		mensagem = input("Digite sua mensagem: ")
 		dest = input("Digite seu destino: ")
+
+		# Codifica a mensagem
 		message.body = mensagem.encode("utf-8")
 		print("")
 
