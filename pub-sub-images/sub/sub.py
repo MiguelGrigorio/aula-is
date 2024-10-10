@@ -20,19 +20,19 @@ try:
     load_dotenv()
     ip = os.getenv("IP") # ip:porta
 
-	# Conectando ao broker
+    # Conectando ao broker
     channel = Channel(f"amqp://guest:guest@{ip}")
 
-	# Subscreve para o canal
+    # Subscreve para o canal
     sub = Subscription(channel)
 
-	# Define quem está subscrevendo
+    # Define quem está subscrevendo
     dest = input("Digite seu nome: ")
 
-	# Define o tópico
+    # Define o tópico
     topico = input("Digite o tópico que deseja subscrever: ")
 
-	# Subscreve para o tópico
+    # Subscreve para o tópico
     sub.subscribe(topic = f"{topico}.{dest}")
     print("\n")
 
