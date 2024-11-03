@@ -1,6 +1,7 @@
 from is_wire.core import Channel, Logger, Message, Status, StatusCode, Subscription
 from is_wire.rpc import ServiceProvider, LogInterceptor
 from RequisicaoRobo_mensagem.RequisicaoRobo_pb2 import RequisicaoRobo
+import socket
 import random
 import time
 
@@ -14,7 +15,7 @@ subscription = Subscription(channel)
 subscription.subscribe(f"Controle.{name}")
 
 def turn_on():
-    time.sleep(1)  # Simulando tempo de resposta
+    time.sleep(1)
     return random.choice(["On", "Off"])
 
 def send_message(content, dest):
@@ -38,24 +39,24 @@ def request_robot(msg, ctx):
     attempts = 0
     while True:
         try:
-            message = channel.consume(timeout=2.0)
+            message = channel.consume(timeout=4.0)
             if message.status.code == StatusCode.OK:
                 message = message.unpack(RequisicaoRobo)
                 log.info(f"ID: {message.id} / Função: {message.function} / Posição do robô {id}: X: {message.positions.x} | Y: {message.positions.y} | Z: {message.positions.z}")
                 log.info(f"Enviando resposta para {reply_to}...")
-                time.sleep(1)  # Aguardar um segundo antes de enviar a resposta
+                time.sleep(1)
                 return message
             else:
                 log.error(message.status.why)
                 log.error(f"Enviando resposta para {reply_to}.")
                 return Status(StatusCode.NOT_FOUND, f"Robô {id} não encontrado.")
-        except TimeoutError:
+        except socket.timeout:
             if attempts >= 3:
                 log.error("Número máximo de tentativas atingido.")
                 return Status(StatusCode.DEADLINE_EXCEEDED, "Número máximo de tentativas atingido.")
             attempts += 1
             log.warn("Timeout. Tentando novamente...")
-            time.sleep(1)  # Aguardar um segundo antes de tentar novamente
+            time.sleep(1)
 
 while system == 'Off':
     log.info("Esperando mensagem para ligar...")

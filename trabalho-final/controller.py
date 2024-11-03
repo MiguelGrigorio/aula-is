@@ -28,14 +28,14 @@ def get_position(msg, ctx):
     reply_to = ctx.reply.topic
     ctx.reply.topic = 'Controle.Console'
     log.info(f"Requisição para pegar a posição do robô {id} feita por {reply_to}.")
-    time.sleep(0.5)  # Aguardar meio segundo antes de processar
+    time.sleep(1)
 
     try:
         robot = next(r for r in robots if r.id == id)
         pos = robot.position
         log.info(f"Posição do robô {id} encontrada: X: {pos.x} | Y: {pos.y} | Z: {pos.z}")
         log.info(f"Enviando resposta para {reply_to}...")
-        time.sleep(0.5)  # Aguardar meio segundo antes de enviar resposta
+        time.sleep(1)
 
         response = RequisicaoRobo(id=id, function="get_position")
         response.positions.x = pos.x
@@ -52,7 +52,7 @@ def set_position(msg, ctx):
     ctx.reply.topic = 'Controle.Console'
     x, y, z = msg.positions.x, msg.positions.y, msg.positions.z
     log.info(f"Requisição para setar a posição do robô {id} feita por {reply_to}.")
-    time.sleep(0.5)  # Aguardar meio segundo antes de processar
+    time.sleep(1)
 
     try:
         robot = next(r for r in robots if r.id == id)
@@ -60,7 +60,7 @@ def set_position(msg, ctx):
         pos = robot.position
         log.info(f"Posição do robô {id} atualizada: X: {pos.x} | Y: {pos.y} | Z: {pos.z}")
         log.info(f"Enviando resposta para {reply_to}...")
-        time.sleep(0.5)  # Aguardar meio segundo antes de enviar resposta
+        time.sleep(1)
 
         response = RequisicaoRobo(id=id, function="set_position")
         response.positions.x = pos.x

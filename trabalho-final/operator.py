@@ -1,6 +1,7 @@
 from is_wire.core import Channel, Logger, Message, StatusCode, Subscription
 from RequisicaoRobo_mensagem.RequisicaoRobo_pb2 import RequisicaoRobo
 from random import randint
+import socket
 import time
 
 system = 'Off'
@@ -24,10 +25,10 @@ def choosing_robot(function, id, x=None, y=None, z=None):
     robot.function = function
 
     if function == "get_position":
-        log.info("Criando mensagem para pegar a posição...")
+        log.info("Enviando mensagem para pegar a posição...")
         channel.publish(Message(content=robot, reply_to=name), topic="Requisicao.Robo")
     else:
-        log.info("Criando mensagem para setar a posição...")
+        log.info("Enviando mensagem para setar a posição...")
         robot.positions.x = x if x is not None else randint(1, 5)
         robot.positions.y = y if y is not None else randint(1, 5)
         robot.positions.z = z if z is not None else randint(1, 5)
@@ -38,7 +39,7 @@ def choosing_robot(function, id, x=None, y=None, z=None):
     attempts = 0
     while True:
         try:
-            msg = channel.consume(timeout=2.0)
+            msg = channel.consume(timeout=4.0)
             if msg.status.code == StatusCode.OK:
                 message = msg.unpack(RequisicaoRobo)
                 position = message.positions
@@ -50,13 +51,14 @@ def choosing_robot(function, id, x=None, y=None, z=None):
                     break
             else:
                 log.error(msg.status.why)
-        except TimeoutError:
+                break
+        except socket.timeout:
             if attempts >= 3:
                 log.error("Número máximo de tentativas atingido.")
                 break
             attempts += 1
             log.warn("Timeout. Tentando novamente...")
-            time.sleep(1)  # Aguardar antes de tentar novamente
+            time.sleep(1)
 
 def turn_on():
     global system
@@ -74,31 +76,30 @@ def turn_on():
             message = channel.consume(timeout=5.0).body.decode("utf-8")
             system = message
             log.info(f"Sistema: {system}")
-        except TimeoutError:
+        except socket.timeout:
             if attempts >= 3:
                 log.error("Número máximo de tentativas atingido.")
                 break
             attempts += 1
             log.warn("Timeout. Tentando novamente...")
-        time.sleep(1)  # Aguardar antes de tentar novamente
+        time.sleep(1)
             
 def menu():
     global system
 
     if system == 'Off':
         log.info("Verificando se o sistema está ligado...")
-        # testando o topico Requisicao.Robo
         req = RequisicaoRobo()
         req.function = "ping"
         channel.publish(Message(content=req, reply_to=name), topic="Requisicao.Robo")
         try:
-            time.sleep(1)  # Aguardar um segundo antes de consumir a mensagem
-            message = channel.consume(timeout=2.0)
+            time.sleep(1)
+            message = channel.consume(timeout=4.0)
             if message.status.code == StatusCode.INVALID_ARGUMENT:
                 system = 'On'
                 log.info("Sistema já está ligado.")
                 menu()
-        except TimeoutError:
+        except socket.timeout:
             log.info("Sistema está desligado.")
 
         print("1 - Ligar o sistema")
