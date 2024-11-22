@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: atividade-kubernetes
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: atividade-kubernetes
+  template:
+    metadata:
+      labels:
+        app: atividade-kubernetes
+    spec:
+      containers:
+      - name: atividade-kubernetes
+        image: miguelgrigorio27/atividade-kubernetes:v1
+        env:
+        - name: IP
+          value: "10.10.0.91:5672"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: atividade-kubernetes
+  namespace: default
+data:
+  IP: "10.10.0.91:5672"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: atividade-kubernetes-pv
+  namespace: default
+spec:
+  capacity:
+    storage: 100Mi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/atividade-kubernetes"
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: atividade-kubernetes-pvc
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
