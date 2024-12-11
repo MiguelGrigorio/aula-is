@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: publisher
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: publisher
+  template:
+    metadata:
+      labels:
+        app: publisher
+    spec:
+      containers:
+      - name: publisher
+        image: seu-usuario/publisher:tag
+        volumeMounts:
+        - name: volume-imagens
+          mountPath: /app/data  # Caminho dentro do contêiner
+        envFrom:
+        - configMapRef:
+            name: app-config
+      volumes:
+      - name: volume-imagens
+        persistentVolumeClaim:
+          claimName: pvc-imagens

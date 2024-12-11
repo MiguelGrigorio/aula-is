@@ -2,6 +2,8 @@ from is_wire.core import Channel, Subscription, Message
 from is_msgs.image_pb2 import Image
 import numpy as np
 import cv2
+import os
+
 
 def to_np(input_image):
     if isinstance(input_image, np.ndarray):
@@ -15,8 +17,9 @@ def to_np(input_image):
 
 
 try:
-
-    ip = "10.10.0.91:5672" # ip:porta
+    # Carregando variáveis de ambiente
+    ip = os.getenv("IP")  # Configurado via ConfigMap
+    default_topic = os.getenv("DEFAULT_TOPIC", "default_topic")  # Tópico padrão
 
     # Conectando ao broker
     channel = Channel(f"amqp://guest:guest@{ip}")
@@ -25,13 +28,13 @@ try:
     sub = Subscription(channel)
 
     # Define quem está subscrevendo
-    dest = "atividadeKubernetes"
+    dest = input("Digite seu nome: ")
 
-    # Define o tópico
-    topico = "images"
+    # Define o tópico, ou usa o padrão
+    topico = input(f"Digite o tópico que deseja subscrever (padrão: {default_topic}): ") or default_topic
 
     # Subscreve para o tópico
-    sub.subscribe(topic = f"{topico}.{dest}")
+    sub.subscribe(topic=f"{topico}.{dest}")
     print("\n")
 
     while True:
@@ -40,16 +43,16 @@ try:
         pack_image = message.unpack(Image)
         image_numpy = to_np(pack_image)
 
-        filename = "images/image.jpeg"
+        filename = input(f"Digite o nome do arquivo para salvar a imagem de {message.reply_to}: ") + ".jpeg"
         cv2.imwrite(filename, image_numpy)
         print('Imagem salva.')
         break
 
 except KeyboardInterrupt:
-	print("\nSaindo...")
+    print("\nSaindo...")
 
 except ConnectionError:
-	print("\nErro ao conectar ao broker.")
+    print("\nErro ao conectar ao broker.")
 
 except Exception as e:
-	print(f"\nErro: {e}")
+    print(f"\nErro: {e}")
