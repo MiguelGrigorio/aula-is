@@ -4,7 +4,9 @@ import cv2
 import numpy as np
 import time
 import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
 def to_image(input_image, encode_format='.jpeg', compression_level=0.8):
     if isinstance(input_image, np.ndarray):
@@ -21,10 +23,11 @@ def to_image(input_image, encode_format='.jpeg', compression_level=0.8):
     else:
         return Image()
 
+
 try:
     # Carregando variáveis de ambiente
-    ip = os.getenv("IP")  # Configurado via ConfigMap
-    default_topic = os.getenv("DEFAULT_TOPIC", "default_topic")  # Tópico padrão
+    ip = os.getenv("IP", "10.10.0.91:5672")
+    topic = os.getenv("TOPIC", "image")
 
     # Conectando ao broker
     channel = Channel(f"amqp://guest:guest@{ip}")
@@ -33,11 +36,7 @@ try:
     message = Message()
 
     # Define quem enviou a mensagem
-    message.reply_to = input("Digite seu nome: ")
-
-    # Define o tópico, ou usa o padrão
-    topico = input(f"Digite o tópico que deseja enviar (padrão: {default_topic}): ") or default_topic
-    print("\n")
+    message.reply_to = "pub"
 
     while True:
         # Define qual a mensagem e o destinatário
@@ -49,10 +48,10 @@ try:
         # Cria o pacote da imagem
         message.pack(to_image(img))
 
-        dest = input("Digite seu destino: ")
+        dest = "sub"
         
         # Envia a mensagem para o destinatário do tópico
-        channel.publish(message, topic=f"{topico}.{dest}")
+        channel.publish(message, topic=f"{topic}.{dest}")
         time.sleep(1)
 
 except KeyboardInterrupt:

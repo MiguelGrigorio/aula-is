@@ -1,26 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: publisher
+  name: miguelsub
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: publisher
+      app: miguelsub
   template:
     metadata:
       labels:
-        app: publisher
+        app: miguelsub
     spec:
       containers:
-      - name: publisher
-        image: seu-usuario/publisher:tag
+      - name: miguelsub
+        image: miguelgrigorio27/deploy-kube:latest
         volumeMounts:
         - name: volume-imagens
           mountPath: /app/data  # Caminho dentro do contêiner
         envFrom:
         - configMapRef:
-            name: app-config
+            name: miguel-deploy-kube-config
       volumes:
       - name: volume-imagens
         persistentVolumeClaim:

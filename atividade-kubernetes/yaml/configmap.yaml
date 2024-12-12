@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: app-config
+  name: miguel-deploy-kube-config
 data:
   IP: "10.10.0.91:5672"
-  DEFAULT_TOPIC: "image"
+  TOPIC: "image"

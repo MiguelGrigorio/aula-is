@@ -4,9 +4,9 @@ metadata:
   name: pv-imagens
 spec:
   capacity:
-    storage: 100Mi  # Tamanho do armazenamento
+    storage: 100Mi
   accessModes:
-  - ReadWriteOnce  # Somente um pod pode montar
+  - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   hostPath:
     path: /data/k8s/images  # Caminho no host onde os dados serão armazenados
